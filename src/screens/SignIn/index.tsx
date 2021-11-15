@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
+import * as AuthSession from 'expo-auth-session';
 import { Button } from '../../components/Button';
 import { SignInContent } from '../../components/SignInContent';
 
@@ -18,7 +18,17 @@ export function SignIn() {
   const navigation = useNavigation();
 
   async function handleSignIn() {
-    navigation.navigate('Profile');
+    const {CLIENT_ID } = process.env;
+    const { REDIRECT_URI } = process.env;
+    const RESPONSE_TYPE = 'token';
+    const ESCOPO = encodeURI('profile email');
+    
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${ESCOPO}`;
+    const { params, type} = await AuthSession.startAsync({authUrl}) as AuthResponse;
+
+    if(type === 'success'){
+      navigation.navigate('Profile', {token: params.access_token});
+    }
   }
 
   return (
